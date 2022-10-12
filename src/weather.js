@@ -11,7 +11,8 @@ const temperature = document.getElementById('temperature');
 const feelslike = document.getElementById('feelslike');
 const wind = document.getElementById('wind');
 const humidity = document.getElementById('humidity');
-console.log(city_container);
+const error = document.querySelector('.error');
+
 
 form_input.addEventListener('keypress', (e) =>{
     if (e.key === "Enter"){
@@ -22,42 +23,43 @@ form_input.addEventListener('keypress', (e) =>{
     }
 })
 
-// city_container.classList.add('fade-in2')
-// console.log(city_container.classList)
-// console.log(form_input)
 
 
 function fades(){
-    if (city_parent.classList.contains("fade-in2")){
+    if (city_parent.classList.contains("fade-in2") && temperature_container.classList.contains("fade-in2") && details_container.classList.contains("fade-in2")){
         city_parent.classList.remove("fade-in2")
-        city_parent.classList.add("fade-in")
-    
-    } else if (city_parent.classList.contains("fade-in"))
-        city_parent.classList.remove("fade-in")
-        city_parent.classList.add("fade-in2")
+        temperature_container.classList.remove("fade-in2")
+        details_container.classList.remove("fade-in2")  
+    } 
+    city_parent.offsetWidth;
+    temperature_container.offsetWidth;
+    details_container.offsetWidth;
+    city_parent.classList.add("fade-in2");
+    temperature_container.classList.add("fade-in2");
+    details_container.classList.add("fade-in2");
+    return;
     
 }
 
 function render_city_to_page(data_object){
     let weather_object = data_object;
-    let temp = weather_object.main.temp;
-    let feelslike = weather_object.main.feels_like;
-    let windy = weather_object.wind.speed;
-    let humid = weather_object.main.humidity;
     city_container.innerHTML = weather_object.name;
-    render_temp_to_page(temp);
-    render_details_to_page(feelslike,windy,humid);
     return;
 }
 
-function render_temp_to_page(temp){
+function render_temp_to_page(data_object){
+    let weather_object_temp = data_object.main.temp;
     temperature_container.style.display = "flex";
-    temperature.innerHTML = temp;
+    temperature.innerHTML = weather_object_temp;
     return;
 
 }
 
-function render_details_to_page(feels_like,windy,humid){
+function render_details_to_page(data_object){
+    let weather_object_details = data_object
+    let feels_like = weather_object_details.main.feels_like;
+    let windy = weather_object_details.wind.speed;
+    let humid = weather_object_details.main.humidity;
     details_container.style.display = "flex";
     feelslike.innerHTML = `Feels like: ${feels_like}`;
     wind.innerHTML = `Wind: ${windy} mph`;
@@ -69,18 +71,37 @@ function reset(){
     value.value = "";
     return;
 }
+
+function check_if_valid_request(status){
+    let response_status = status;
+    console.log('Display error with response status: ', response_status);
+    if (response_status === 404 || response_status === 400){
+        error.style.visibility = "visible";
+        return false;
+    }else{
+        error.style.visibility = "hidden";
+        
+    }
+    return true;
+}
+
+function render_weather_request(data){
+    render_city_to_page(data);
+    render_temp_to_page(data);
+    render_details_to_page(data)
+    fades()
+    return reset();
+}
+
 async function pingWeatherAPI(city){
     let response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=${API_KEY}&units=imperial`);
-    
+    let status_code = response.status
 
-
+    if (check_if_valid_request(status_code) === false){
+        return;
+    }
     let data = await response.json();
-    console.log(data);
-    render_city_to_page(data);
-    console.log('This is the temperature: ', data.main.temp);
-    reset();
-
-    return 'All Done!';
+    return render_weather_request(data);
 
 
 

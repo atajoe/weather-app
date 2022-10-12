@@ -26,9 +26,12 @@ body{
 }
 
 .form-group{
-    position:absolute;
+    position: absolute;
     right: 0;
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .form-group > input[type=text]{
@@ -116,6 +119,13 @@ body{
     left: 40%;
     border-left: 1px solid white;
     padding-left: 2rem;
+}
+
+.error{
+    color: red;
+    font-size: 1rem;
+    font-weight: 700;
+    visibility: hidden;
 }
 
 @keyframes fadeIn {
